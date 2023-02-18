@@ -1,6 +1,8 @@
 package com.example.Project3.models;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -17,7 +19,10 @@ public class Measurement {
     private Sensor sensor;
 
     @Column(name = "temperature")
-    private float temperature;
+    @NotNull(message = "Temperature should be not null")
+    @Min(value = -100, message = "Temperature should be bigger than -100")
+    @Max(value = 100, message = "Temperature should be less than -100")
+    private double temperature;
 
     @Column(name = "rain")
     @NotNull(message = "Rain value should be not empty")
@@ -42,11 +47,11 @@ public class Measurement {
         this.sensor = sensor;
     }
 
-    public float getTemperature() {
+    public double getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(float temperature) {
+    public void setTemperature(double temperature) {
         this.temperature = temperature;
     }
 
