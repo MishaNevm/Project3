@@ -1,6 +1,7 @@
 package com.example.Project3.controllers;
 
 import com.example.Project3.dto.MeasurementDTO;
+import com.example.Project3.dto.MeasurementResponse;
 import com.example.Project3.models.Measurement;
 import com.example.Project3.services.MeasurementService;
 import com.example.Project3.util.ErrorResponse;
@@ -16,7 +17,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/measurements")
@@ -34,13 +35,15 @@ public class MeasurementController {
     }
 
     @GetMapping
-    public List<MeasurementDTO> findAll() {
-        return measurementService.findAll().stream().map(this::convertToMeasurementDTO).toList();
+    public MeasurementResponse findAll() {
+        return new MeasurementResponse(measurementService.findAll().stream()
+                .map(this::convertToMeasurementDTO).collect(Collectors.toList()));
     }
 
     @GetMapping("/rainyDaysCount")
-    public List<MeasurementDTO> findByRainyDays() {
-        return measurementService.findByRain().stream().map(this::convertToMeasurementDTO).toList();
+    public Long findByRainyDays() {
+        return measurementService.findByRain()
+                .stream().filter(Measurement::isRain).count();
 
     }
 
