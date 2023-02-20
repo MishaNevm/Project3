@@ -5,6 +5,7 @@ import com.example.Project3.dto.MeasurementResponse;
 import com.example.Project3.models.Measurement;
 import com.example.Project3.services.MeasurementService;
 import com.example.Project3.util.ErrorResponse;
+import com.example.Project3.util.ErrorUtil;
 import com.example.Project3.util.measurement.MeasurementNotCreatedException;
 import com.example.Project3.util.measurement.MeasurementNotFoundException;
 import com.example.Project3.util.measurement.MeasurementSensorValidator;
@@ -13,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -28,7 +28,8 @@ public class MeasurementController {
     private final ModelMapper modelMapper;
 
     @Autowired
-    public MeasurementController(MeasurementService measurementService, MeasurementSensorValidator measurementSensorValidator, ModelMapper modelMapper) {
+    public MeasurementController(MeasurementService measurementService,
+                                 MeasurementSensorValidator measurementSensorValidator, ModelMapper modelMapper) {
         this.measurementService = measurementService;
         this.measurementSensorValidator = measurementSensorValidator;
         this.modelMapper = modelMapper;
@@ -50,7 +51,7 @@ public class MeasurementController {
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> exceptionHandler(MeasurementNotFoundException e) {
         ErrorResponse measurementErrorResponse =
-                new ErrorResponse("Measurements not found", System.currentTimeMillis());
+                new ErrorResponse(e.getMessage(), System.currentTimeMillis());
         return new ResponseEntity<>(measurementErrorResponse, HttpStatus.NOT_FOUND);
     }
 
@@ -60,12 +61,7 @@ public class MeasurementController {
         Measurement measurementToAdd = convertToMeasurement(measurementDTO);
         measurementSensorValidator.validate(measurementToAdd, bindingResult);
         if (bindingResult.hasErrors()) {
-            StringBuilder errorMessage = new StringBuilder();
-            for (FieldError fieldError : bindingResult.getFieldErrors()) {
-                errorMessage.append(fieldError.getField()).append(" - ")
-                        .append(fieldError.getDefaultMessage()).append(";");
-            }
-            throw new MeasurementNotCreatedException(errorMessage.toString());
+            throw new MeasurementNotCreatedException(ErrorUtil.errorsToString(bindingResult));
         }
         measurementService.save(convertToMeasurement(measurementDTO));
         return ResponseEntity.ok(HttpStatus.OK);

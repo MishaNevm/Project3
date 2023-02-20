@@ -4,6 +4,7 @@ import com.example.Project3.dto.SensorDTO;
 import com.example.Project3.models.Sensor;
 import com.example.Project3.services.SensorService;
 import com.example.Project3.util.ErrorResponse;
+import com.example.Project3.util.ErrorUtil;
 import com.example.Project3.util.sensor.SensorNotCreatedException;
 import com.example.Project3.util.sensor.SensorRegistrationValidator;
 import org.modelmapper.ModelMapper;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -36,12 +36,7 @@ public class SensorController {
                                                    BindingResult bindingResult) {
         sensorRegistrationValidator.validate(sensorDTO, bindingResult);
         if (bindingResult.hasErrors()) {
-            StringBuilder errorMessage = new StringBuilder();
-            for (FieldError fieldError : bindingResult.getFieldErrors()) {
-                errorMessage.append(fieldError.getField()).append(" - ")
-                        .append(fieldError.getDefaultMessage()).append(";");
-            }
-            throw new SensorNotCreatedException(errorMessage.toString());
+            throw new SensorNotCreatedException(ErrorUtil.errorsToString(bindingResult));
         }
         sensorService.save(convertToSensor(sensorDTO));
         return ResponseEntity.ok(HttpStatus.OK);
