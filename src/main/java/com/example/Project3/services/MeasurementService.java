@@ -26,14 +26,14 @@ public class MeasurementService {
     @Transactional
     public List<Measurement> findAll() {
         List<Measurement> measurements = measurementRepository.findAll();
-        if (measurements.isEmpty()) throw new MeasurementNotFoundException();
+        if (measurements.isEmpty()) throw new MeasurementNotFoundException("Measurement not found");
         return measurements;
     }
 
     @Transactional
     public List<Measurement> findByRain() {
         List<Measurement> rainMeasurements = measurementRepository.findByRain(true);
-        if (rainMeasurements.isEmpty()) throw new MeasurementNotFoundException();
+        if (rainMeasurements.isEmpty()) throw new MeasurementNotFoundException("Rain measurement not found");
         return rainMeasurements;
     }
 

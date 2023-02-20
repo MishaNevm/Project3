@@ -51,7 +51,7 @@ public class MeasurementController {
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> exceptionHandler(MeasurementNotFoundException e) {
         ErrorResponse measurementErrorResponse =
-                new ErrorResponse("Measurements not found", System.currentTimeMillis());
+                new ErrorResponse(e.getMessage(), System.currentTimeMillis());
         return new ResponseEntity<>(measurementErrorResponse, HttpStatus.NOT_FOUND);
     }
 
