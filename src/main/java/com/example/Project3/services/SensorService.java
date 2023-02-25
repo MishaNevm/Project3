@@ -6,10 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class SensorService {
     private final SensorRepository sensorRepository;
 
@@ -17,11 +18,14 @@ public class SensorService {
         this.sensorRepository = sensorRepository;
     }
 
-    @Transactional(readOnly = true)
+    public List<Sensor> findAll () {
+        return sensorRepository.findAll();
+    }
+
     public Optional<Sensor> findByName (String name) {
         return sensorRepository.findByName(name);
     }
-
+    @Transactional
     public void save (Sensor sensor) {
         sensor.setCreatedAt(LocalDateTime.now());
         sensorRepository.save(sensor);
