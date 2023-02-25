@@ -1,6 +1,7 @@
 package com.example.Project3.controllers;
 
 import com.example.Project3.dto.SensorDTO;
+import com.example.Project3.dto.SensorResponse;
 import com.example.Project3.models.Sensor;
 import com.example.Project3.services.SensorService;
 import com.example.Project3.util.ErrorResponse;
@@ -15,6 +16,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/sensors")
@@ -25,10 +27,17 @@ public class SensorController {
     private final ModelMapper modelMapper;
 
     @Autowired
-    public SensorController(SensorService sensorService, SensorRegistrationValidator sensorRegistrationValidator, ModelMapper modelMapper) {
+    public SensorController(SensorService sensorService,
+                            SensorRegistrationValidator sensorRegistrationValidator, ModelMapper modelMapper) {
         this.sensorService = sensorService;
         this.sensorRegistrationValidator = sensorRegistrationValidator;
         this.modelMapper = modelMapper;
+    }
+
+    @GetMapping
+    public SensorResponse findAll() {
+        return new SensorResponse(sensorService.findAll().stream()
+                .map(this::convertToSensorDTO).collect(Collectors.toList()));
     }
 
     @PostMapping("/registration")
@@ -50,5 +59,9 @@ public class SensorController {
 
     private Sensor convertToSensor(SensorDTO sensorDTO) {
         return modelMapper.map(sensorDTO, Sensor.class);
+    }
+
+    private SensorDTO convertToSensorDTO(Sensor sensor) {
+        return modelMapper.map(sensor, SensorDTO.class);
     }
 }
