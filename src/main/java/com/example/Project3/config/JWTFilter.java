@@ -2,6 +2,7 @@ package com.example.Project3.config;
 
 import com.example.Project3.security.JWTUtil;
 import com.example.Project3.services.AdminDetailsService;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,16 +34,21 @@ public class JWTFilter extends OncePerRequestFilter {
             String jwt = authHeader.substring(7);
             if (jwt.isBlank()) response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Token not valid");
             else {
-                String username = jwtUtil.validateTokenAndRetrieveClaim(jwt);
-                UserDetails adminDetails = adminDetailsService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken token =
-                        new UsernamePasswordAuthenticationToken
-                                (adminDetails, adminDetails.getPassword(), adminDetails.getAuthorities());
-                if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                    SecurityContextHolder.getContext().setAuthentication(token);
-                }
+                try {
+                    String username = jwtUtil.validateTokenAndRetrieveClaim(jwt);
+                    UserDetails adminDetails = adminDetailsService.loadUserByUsername(username);
+                    UsernamePasswordAuthenticationToken token =
+                            new UsernamePasswordAuthenticationToken
+                                    (adminDetails, adminDetails.getPassword(), adminDetails.getAuthorities());
+                    if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                        SecurityContextHolder.getContext().setAuthentication(token);
+                    }
 
-            }
+                }catch (Exception e) {
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    response.getWriter().write("JWT token expired");
+                    return;
+                }}
         }
         filterChain.doFilter(request, response);
     }
